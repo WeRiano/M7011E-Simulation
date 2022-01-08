@@ -20,12 +20,18 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = '=lnfwc@+xqgrs7-1(5i07zdld^k7%y3x_75+pg+8q+14=0h)1-'
+SECRET_KEY = str(os.environ.get('DJANGO_SECRET_KEY'))
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = bool(int(os.environ.get('DEBUG', 0)))
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = []
+ALLOWED_HOSTS.extend(
+    filter(
+        None,
+        os.environ.get('ALLOWED_HOSTS', '').split(', ')
+    )
+)
 
 # Application definition
 
@@ -55,14 +61,11 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_ALL_ORIGINS = False
 
 CORS_ALLOWED_ORIGINS = [
-    "http://127.0.0.1:8001",
-    "http://localhost:8001",
-    "http://127.0.0.1:7999",
-    "http://localhost:7999"
-
+    "http://" + os.environ.get("FRONTEND_IP", "127.0.0.1") + ":8001",
+    "http://" + os.environ.get("BACKEND_IP", "127.0.0.1") + ":7999"
 ]
 
 CORS_ALLOWED_METHODS = [
