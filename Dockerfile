@@ -16,7 +16,7 @@ ENV LIBRARY_PATH=/lib:/usr/lib
 RUN python -m venv /py && \
     /py/bin/pip install --upgrade pip && \
     /py/bin/pip install -r /requirements.txt && \
-    adduser --disabled-password --no-create-home simulation && \
-    chown simulation:simulation -R /Simulation/
+    chmod -R +x /scripts
+
 
 ENV PATH="/py/bin:$PATH"
