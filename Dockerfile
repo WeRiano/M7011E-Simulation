@@ -2,21 +2,24 @@ FROM python:3.9.9-alpine3.15 as simulation
 LABEL maintainer="m7011e"
 
 ENV PYTHONUNBUFFERED 1
-ENV DJANGO_SETTINGS_MODULE Simulation.settings
 
-COPY requirements.txt /requirements.txt
-COPY Simulation /Simulation
+COPY ./requirements.txt /app/requirements.txt
+COPY ./Simulation /app/Simulation
 
-WORKDIR /Simulation
+WORKDIR /app/Simulation
+
 EXPOSE 8000
 
 RUN apk add build-base python3-dev py-pip jpeg-dev zlib-dev libressl-dev musl-dev libffi-dev
-ENV LIBRARY_PATH=/lib:/usr/lib
 
-RUN python -m venv /py && \
-    /py/bin/pip install --upgrade pip && \
-    /py/bin/pip install -r /requirements.txt && \
-    chmod -R +x /scripts
+RUN python -m venv /app/py && \
+    /app/py/bin/pip install --upgrade pip && \
+    /app/py/bin/pip install -r /app/requirements.txt && \
+    chmod -R a+x /app
 
+ENV PATH="/app/py/bin:$PATH"
 
-ENV PATH="/py/bin:$PATH"
+ADD ./scripts/simulation_run.sh /app/Simulation
+RUN chmod 755 simulation_run.sh
+
+CMD ["./simulation_run.sh"]
