@@ -1,4 +1,4 @@
-FROM python:3.9.9-alpine3.15 as simulation
+FROM python:3.9-alpine3.13 as simulation
 LABEL maintainer="m7011e"
 
 ENV PYTHONUNBUFFERED 1
