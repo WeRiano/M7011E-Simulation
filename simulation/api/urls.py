@@ -1,6 +1,6 @@
 from django.urls import path, register_converter
-from . import views
 
+from . import views
 
 class FloatConverter:
     regex = '[\d\.\d]+'

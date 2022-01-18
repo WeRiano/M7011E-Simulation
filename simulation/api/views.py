@@ -1,7 +1,7 @@
 from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from Simulation.manager import Manager
+from simulation.manager import Manager
 
 
 @api_view(['GET'])
@@ -19,7 +19,7 @@ def get_conditions(request, conditions):
 def set_delta(request, delta):
     if delta > 3600 or delta < 5:
         response = {
-            "error": "Simulation update frequency must be on the interval [5, 3600] seconds"
+            "error": "simulation update frequency must be on the interval [5, 3600] seconds"
         }
         return Response(data=response, status=status.HTTP_400_BAD_REQUEST)
     Manager.set_delta(request.headers['Authorization'], delta)

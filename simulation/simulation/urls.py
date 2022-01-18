@@ -1,4 +1,4 @@
-"""Simulation URL Configuration
+"""simulation URL Configuration
 
 The `urlpatterns` list routes URLs to views. For more information please see:
     https://docs.djangoproject.com/en/3.2/topics/http/urls/
@@ -18,8 +18,11 @@ from django.urls import path, include
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
+from . import views
+
 urlpatterns = [ 
     #path('admin/', admin.site.urls),
-    path('api/version/1/', include('API.urls'), name="simulation API version 1.0")
-    # TODO: I guess future versions would create another django Simulation and then redirect to that!
+    path('ping/', views.ping),
+    path('api/version/1/', include('api.urls'), name="simulation api version 1.0")
+    # TODO: I guess future versions would create another django simulation and then redirect to that!
 ]

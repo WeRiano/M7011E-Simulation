@@ -3,8 +3,8 @@ from requests import get as request_get
 from time import sleep
 from typing import Dict
 
-from Simulation.delta import Delta
-from Simulation.state import State
+from .delta import Delta
+from .state import State
 
 
 class Manager:

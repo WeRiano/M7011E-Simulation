@@ -2,11 +2,12 @@ FROM python:3.9-alpine3.13 as simulation
 LABEL maintainer="m7011e"
 
 ENV PYTHONUNBUFFERED 1
+ENV DJANGO_SETTINGS_MODULE simulation.settings
 
 COPY ./requirements.txt /app/requirements.txt
-COPY ./Simulation /app/Simulation
+COPY simulation /app/simulation
 
-WORKDIR /app/Simulation
+WORKDIR /app/simulation
 
 EXPOSE 8000
 
@@ -19,7 +20,7 @@ RUN python -m venv /app/py && \
 
 ENV PATH="/app/py/bin:$PATH"
 
-ADD ./scripts/simulation_run.sh /app/Simulation
+ADD ./scripts/simulation_run.sh /app/simulation
 RUN chmod 755 simulation_run.sh
 
 CMD ["./simulation_run.sh"]

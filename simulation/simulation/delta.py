@@ -1,7 +1,7 @@
 from numpy import random
 import requests
 
-from Simulation.state import State
+from .state import State
 
 
 # This class is response for manipulating the state
@@ -132,7 +132,7 @@ class Delta:
         # "https://opendata-download-metobs.smhi.se/api/version/1.0/parameter/22/station/162870/period/latest-months/data.json"
         # "https://opendata-download-metobs.smhi.se/api/version/1.0/parameter/22/station/162860.json"
 
-        # defining a params dict for the parameters to be sent to the API
+        # defining a params dict for the parameters to be sent to the api
         params = {
             "p": "mjolkudden",
             "cli": "wind_turbine_simulator_LTU_M7011E"
