@@ -11,11 +11,16 @@ WORKDIR /app/simulation
 
 EXPOSE 8000
 
-RUN apk add build-base python3-dev py-pip jpeg-dev zlib-dev libressl-dev musl-dev libffi-dev
+#RUN apk add build-base python3-dev py-pip jpeg-dev zlib-dev libressl-dev musl-dev libffi-dev
+
+RUN apk add build-base python3-dev py-pip
 
 RUN python -m venv /app/py && \
     /app/py/bin/pip install --upgrade pip && \
+    apk add --update --no-cache --virtual .tmp-deps \
+        build-base musl-dev linux-headers && \
     /app/py/bin/pip install -r /app/requirements.txt && \
+    apk del .tmp-deps && \
     chmod -R a+x /app
 
 ENV PATH="/app/py/bin:$PATH"

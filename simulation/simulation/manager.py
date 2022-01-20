@@ -2,6 +2,7 @@ import threading
 from requests import get as request_get
 from time import sleep
 from typing import Dict
+import os
 
 from .delta import Delta
 from .state import State
