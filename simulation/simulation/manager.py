@@ -1,7 +1,9 @@
-import threading
 from requests import get as request_get
 from time import sleep
 from typing import Dict
+import os
+import threading
+import json
 
 from .delta import Delta
 from .state import State
@@ -62,14 +64,14 @@ class Manager:
     @staticmethod
     def __request_get_total_users():
         # TODO: Do not hardcode urls
-        url = "http://" + os.environ.get("BACKEND_IP", "127.0.0.1") + ":7999/auth/users/get_total/"
+        url = "http://" + os.environ.get("BACKEND_IP", "127.0.0.1") + ":7999/api/version/1/users/get_total/"
         r = request_get(url)
         return r.json()["number_of_users"]
 
     @staticmethod
     def __request_get_user_id(token_header):
         # TODO: Do not hardcode urls
-        url = "http://" + os.environ.get("BACKEND_IP", "127.0.0.1") + ":7999/auth/users/get_profile/"
+        url = "http://" + os.environ.get("BACKEND_IP", "127.0.0.1") + ":7999/api/version/1/users/get_profile/"
         header = {
             "Authorization": token_header
         }
