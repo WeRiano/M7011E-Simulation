@@ -1,7 +1,5 @@
-from requests import get as request_get
 from time import sleep
 from typing import Dict
-import os
 import threading
 
 from .delta import Delta
@@ -9,39 +7,52 @@ from .state import State
 
 
 class Manager:
-
     instances: Dict[int, Delta] = {}
 
     @staticmethod
-    def set_delta(auth_token, delta):
-        user_id = Manager.__request_get_user_id(auth_token)
-        try:
-            Manager.instances[user_id].set_delta(delta)
-        except KeyError:
+    def set_delta(delta, user_id):
+        if not Manager.__sim_exists(user_id):
             Manager.__start_instance(user_id)
-            Manager.instances[user_id].set_delta(delta)
+        result = Manager.instances[user_id].set_delta(delta)
+        return result
 
     @staticmethod
-    def set_ratios(saving, using, auth_token):
-        user_id = Manager.__request_get_user_id(auth_token)
-        try:
-            Manager.instances[user_id].set_ratios(saving, using)
-        except KeyError:
+    def set_ratios(saving, using, user_id):
+        if not Manager.__sim_exists(user_id):
             Manager.__start_instance(user_id)
-            Manager.instances[user_id].set_ratios(saving, using)
+        result = Manager.instances[user_id].set_ratios(saving, using)
+        return result
 
     @staticmethod
-    def get_conditions(filter_slug, auth_token):
-        user_id = Manager.__request_get_user_id(auth_token)
-        try:
-            state_cond = Manager.instances[user_id].get_state().get_conditions(filter_slug)
-            delta_cond = Manager.instances[user_id].get_conditions(filter_slug)
-            return {**state_cond, **delta_cond}
-        except KeyError:
+    def get_conditions(filter_slug, user_id):
+        if not Manager.__sim_exists(user_id):
             Manager.__start_instance(user_id)
-            state_cond = Manager.instances[user_id].get_state().get_conditions(filter_slug)
-            delta_cond = Manager.instances[user_id].get_conditions(filter_slug)
-            return {**state_cond, **delta_cond}
+        state_cond = Manager.instances[user_id].get_conditions(filter_slug)
+        delta_cond = Manager.instances[user_id].get_state().get_conditions(filter_slug)
+        return {**state_cond, **delta_cond}
+
+    @staticmethod
+    def restart_instance(user_id):
+        if not Manager.__sim_exists(user_id):
+            Manager.__start_instance(user_id)
+        else:
+            # Exact same as in __start_instance() except we don't have to boot up a thread running the driver, since
+            # it is already running
+            state = State()
+            delta = Delta(state, 0, 1, 1)
+            delta.tick_hour()
+            delta.update_state()
+            Manager.instances[user_id] = delta
+
+    @staticmethod
+    def __operation_wrapper(user_id, manager_operation, *operation_params):
+        if Manager.__sim_exists(user_id):
+            op_result = Manager.instances[user_id].manager_operation(*operation_params)
+            return op_result
+        else:
+            Manager.__start_instance(user_id)
+            op_result = manager_operation(*operation_params)
+            return op_result
 
     @staticmethod
     def __instance_driver(delta):
@@ -60,22 +71,7 @@ class Manager:
         thread = threading.Thread(target=Manager.__instance_driver, args=(delta,), name=str(user_id))
         thread.start()
 
+    # Checks if the given simulation is running
     @staticmethod
-    def __request_get_total_users():
-        # TODO: Do not hardcode urls
-        url = "http://" + os.environ.get("BACKEND_IP", "127.0.0.1") + ":7999/api/version/1/users/get_total/"
-        r = request_get(url)
-        return r.json()["number_of_users"]
-
-    @staticmethod
-    def __request_get_user_id(token_header):
-        # TODO: Do not hardcode urls
-        url = "http://" + os.environ.get("BACKEND_IP", "127.0.0.1") + ":7999/api/version/1/users/get_profile/"
-        header = {
-            "Authorization": token_header
-        }
-        r = request_get(url, headers=header)
-        try:
-            return r.json()['id']
-        except KeyError:
-            return -1
+    def __sim_exists(user_id):
+        return user_id in Manager.instances
