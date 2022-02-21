@@ -31,8 +31,11 @@ def get_conditions(request, conditions):
         return response
 
     token_header = request.headers['Authorization']
-    request_get_user_info(token_header)
-    user_id = request_get_user_info(token_header)["id"]     # Get "my" id
+    user_data = request_get_user_info(token_header)
+    error, response = __validate_backend_request(user_data)
+    if error:
+        return response
+    user_id = user_data["id"]     # Get "my" id
 
     conditions = Manager.get_conditions(conditions, user_id)
     return Response(data=conditions, status=status.HTTP_200_OK)
@@ -65,7 +68,11 @@ def set_delta(request, delta):
         return response
 
     token_header = request.headers['Authorization']
-    user_id = request_get_user_info(token_header)["id"]  # Get "my" id
+    user_data = request_get_user_info(token_header)
+    error, response = __validate_backend_request(user_data)
+    if error:
+        return response
+    user_id = user_data["id"]  # Get "my" id
 
     Manager.set_delta(delta, user_id)
     return Response(data={"success": "User simulation update frequency (delta) updated"
@@ -103,7 +110,11 @@ def set_ratios(request, storing, using):
         return response
 
     token_header = request.headers['Authorization']
-    user_id = request_get_user_info(token_header)["id"]  # Get "my" id
+    user_data = request_get_user_info(token_header)
+    error, response = __validate_backend_request(user_data)
+    if error:
+        return response
+    user_id = user_data["id"]  # Get "my" id
 
     Manager.set_ratios(storing, using, user_id)
     return Response(data={"success": "User ratios updated successfully to storing: {0}"
@@ -136,16 +147,25 @@ def admin_set_ratios(request, storing, using, user_id):
 def __admin_endpoint_validations(user_id, admin_token_header):
     error, response = __validate_admin(admin_token_header)
     if error:
-        return response
+        return error, response
 
     error, response = __validate_user_id(user_id)
     if error:
-        return response
+        return error, response
 
     error, response = __validate_simulation(user_id, admin_token_header)
     if error:
         return error, response
 
+    return False, None
+
+
+def __validate_backend_request(backend_json_response):
+    if "detail" in backend_json_response and backend_json_response["detail"] == "Invalid token.":
+        response = {
+            "error": "Invalid token."
+        }
+        return True, Response(data=response, status=status.HTTP_403_FORBIDDEN)
     return False, None
 
 
@@ -161,7 +181,7 @@ def __validate_simulation(user_id, admin_token_header):
     response = {
         "error": "The given user id does not match any user in the backend service."
     }
-    return True, response
+    return True, Response(data=response, status=status.HTTP_400_BAD_REQUEST)
 
 
 def __validate_delta(delta):
@@ -183,6 +203,11 @@ def __validate_user_id(user_id):
 
 
 def __validate_admin(admin_token_header):
+    user_data = request_get_user_info(admin_token_header)
+    error, response = __validate_backend_request(user_data)
+    if error:
+        return error, response
+
     is_admin = request_get_user_info(admin_token_header)["admin"]
     if not is_admin:
         response = {

@@ -104,7 +104,7 @@ class State:
             result["bank"] = self.__bank
             return result
         else:
-            for condition in filter_list["conditions"]:
+            for condition in filter_list:
                 if condition.lower() == "wind_speed":
                     result["wind_speed"] = self.__wind_speed
                     continue

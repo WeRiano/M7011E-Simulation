@@ -91,8 +91,8 @@ class Delta:
             result["using"] = self.__using
         else:
             for condition in filter_list:
-                if condition.lower() == "current_time":
-                    result["date_time"] = str(self.__day + 1) + '/' + str(self.__month) + 1 + " " + str(self.__hour) + ":00:00"
+                if condition.lower() == "date_time":
+                    result["date_time"] = str(self.__day + 1) + '/' + str(self.__month + 1) + " " + str(self.__hour) + ":00:00"
                 if condition.lower() == "delta":
                     result["delta"] = self.__update_frequency
                 if condition.lower() == "saving":
